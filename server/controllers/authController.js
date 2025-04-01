@@ -104,12 +104,55 @@ const logoutUser = async (req, res) => {};
 // @desc Get user profile
 // @route GET /api/auth/profile
 // @access Private (Required JWT token)
-const getUserProfile = async (req, res) => {};
+const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 // @desc Update user profile
 // @route PUT /api/auth/profile
 // @access Private (Required JWT token)
-const updateUserProfile = async (req, res) => {};
+const updateUserProfile = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Find the user and update their information
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update user fields
+    user.name = name || user.name;
+    user.email = email || user.email;
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    // Save the updated user
+    await user.save();
+
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 module.exports = {
   registerUser,
