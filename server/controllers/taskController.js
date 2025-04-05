@@ -273,6 +273,69 @@ const updateTaskChecklist = async (req, res) => {
 // @access  Private/Admin
 const getDashboardData = async (req, res) => {
   try {
+    // Fetch Statistics for the dashboard
+    const totalTasks = await Task.countDocuments({});
+    const pendingTasks = await Task.countDocuments({ status: "Pending" });
+    const completedTasks = await Task.countDocuments({ status: "Completed" });
+    const overdueTasks = await Task.countDocuments({
+      status: { $ne: "Completed" },
+      dueDate: { $lt: new Date() },
+    });
+
+    // Ensure all possible task statuses are included in the response
+    const taskStatuses = ["Pending", "In Progress", "Completed"];
+    const taskDistribution = await Task.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const taskDistributionMap = taskStatuses.reduce((acc, status) => {
+      const formattedKey = status.replace(/\s+/g, "");
+      acc[formattedKey] =
+        taskDistribution.find((item) => item._id === status)?.count || 0;
+      return acc;
+    }, {});
+    taskDistributionMap["All"] = totalTasks;
+
+    // Ensure all possible task priorities are included in the response
+    const taskPriorities = ["High", "Medium", "Low"];
+    const taskPriorityLevelsRaw = await Task.aggregate([
+      {
+        $group: {
+          _id: "$priority",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const taskPriorityLevels = taskPriorities.reduce((acc, priority) => {
+      acc[priority] =
+        taskPriorityLevelsRaw.find((item) => item._id === priority)?.count || 0;
+      return acc;
+    }, {});
+
+    // Fetch recent 10 tasks
+    const recentTasks = await Task.find({})
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select("title status priority dueDate createdAt");
+
+    res.status(200).json({
+      statistics: {
+        totalTasks,
+        pendingTasks,
+        completedTasks,
+        overdueTasks,
+      },
+      chart: {
+        taskDistribution: taskDistributionMap,
+        taskPriorityLevels,
+      },
+      recentTasks,
+      message: "Dashboard data fetched successfully",
+    });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
