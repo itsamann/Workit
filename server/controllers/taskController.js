@@ -174,6 +174,29 @@ const updateTask = async (req, res) => {
 // @access  Private
 const updateTaskStatus = async (req, res) => {
   try {
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const isAssigned = task.assignedTo.some(
+      (userId) => userId.toString() === req.user._id.toString()
+    );
+    if (!isAssigned && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this task" });
+    }
+    task.status = req.body.status || task.status;
+
+    if (task.status === "Completed") {
+      task.todoChecklist.forEach((item) => {
+        item.completed = true;
+      });
+      task.progress = 100;
+    }
+    await task.save();
+    res.status(200).json({ message: "Task status updated successfully", task });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
