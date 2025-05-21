@@ -6,7 +6,7 @@ function AuthLayout({ children }) {
   const isLoginPage = location.pathname === "/login"; // Check if it's the login page
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden font-[Poppins] bg-white">
+    <div className="flex flex-col md:flex-row min-h-screen overflow-hidden font-[Poppins] bg-white">
       {/* Left Panel (Form Side) */}
       <div className="w-full md:w-[55%] px-8 sm:px-14 py-12 flex flex-col justify-between">
         <div>
@@ -15,7 +15,7 @@ function AuthLayout({ children }) {
           </h1>
           {children}
         </div>
-        <p className="text-sm text-gray-400 text-center mt-10">
+        <p className=" text-sm text-gray-400 text-center mt-40 mb-4">
           © {new Date().getFullYear()} Workit. All rights reserved.
         </p>
       </div>

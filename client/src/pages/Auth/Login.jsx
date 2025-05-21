@@ -26,7 +26,7 @@ const Login = () => {
       setError("Please enter a valid password.");
       return;
     }
-    setError("null");
+    setError("");
 
     setLoading(true);
 
