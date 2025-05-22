@@ -16,7 +16,7 @@ import CreateTask from "./pages/Admin/CreateTask";
 import ManageUsers from "./pages/Admin/ManageUsers";
 
 // User Pages
-import UserDashboard from "./pages/User/Dashboard";
+import UserDashboard from "./pages/User/UserDashboard";
 import MyTasks from "./pages/User/MyTasks";
 import ViewTaskDetails from "./pages/User/ViewTaskDetails";
 import { UserContext, UserProvider } from "./context/userContext";
