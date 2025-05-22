@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import AuthLayout from "../../components/layouts/AuthLayout";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/inputs/input";
 import { Link } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
+import { UserContext } from "../../context/userContext";
+import axiosInstance from "../../utils/axiosInstance";
+import { API_PATHS } from "../../utils/apiPaths";
 
 const Login = () => {
   const [email, setEmail] = React.useState("");
@@ -12,6 +15,7 @@ const Login = () => {
   const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(null);
 
+  const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   // Function to handle form submission
@@ -31,6 +35,29 @@ const Login = () => {
     setLoading(true);
 
     // Simulate an API call
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
+        email,
+        password,
+      });
+      const { token, role } = response.data;
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(response.data);
+
+        if (role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/user/dashboard");
+        }
+      }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("An error occurred. Please try again.");
+      }
+    }
   };
 
   return (

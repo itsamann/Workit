@@ -20,6 +20,7 @@ const Input = ({ value, onChange, label, placeholder, type = "text" }) => {
           value={value}
           onChange={onChange}
           placeholder={placeholder}
+          autoComplete="current-password"
           className="w-full bg-transparent outline-none text-sm"
         />
         {type === "password" &&
