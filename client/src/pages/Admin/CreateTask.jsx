@@ -5,9 +5,9 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
-import moment from "moment";
 import { LuTrash2 } from "react-icons/lu";
 import SelectDropdown from "../../components/Inputs/SelectDropdown";
+import TodoListInput from "../../components/Inputs/TodoListInput";
 import SelectUsers from "../../components/Inputs/SelectUser";
 
 const CreateTask = () => {
@@ -129,8 +129,8 @@ const CreateTask = () => {
                   options={PRIORITY_DATA}
                   value={taskData.priority}
                   placeholder={"Select Priority"}
-                  onChange={(e) =>
-                    handleValueChange("priority", e.target.value)
+                  onChange={(selectValue) =>
+                    handleValueChange("priority", selectValue)
                   }
                   className="form-input"
                 />
@@ -142,14 +142,14 @@ const CreateTask = () => {
                 </label>
                 <input
                   type="date"
-                  value={taskData.dueDate}
+                  value={taskData.dueDate || ""}
                   onChange={(e) => handleValueChange("dueDate", e.target.value)}
                   className="form-input"
                   placeholder="Select Due Date"
                 />
               </div>
 
-              <div className="col-span-6 md:col-span-3">
+              <div className="col-span-6 md:col-span-4">
                 <label className="text-xs font-medium text-slate-600">
                   Assigned To
                 </label>
@@ -157,6 +157,19 @@ const CreateTask = () => {
                   selectedUsers={taskData.assignedTo}
                   setSelectedUsers={(value) => {
                     handleValueChange("assignedTo", value);
+                  }}
+                />
+              </div>
+
+              <div className="col-span-6 md:col-span-4">
+                <label className="text-xs font-medium text-slate-600">
+                  TODO Checklist
+                </label>
+
+                <TodoListInput
+                  todoList={taskData?.todoChecklist}
+                  setTodoList={(value) => {
+                    handleValueChange("todoChecklist", value);
                   }}
                 />
               </div>

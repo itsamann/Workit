@@ -9,7 +9,7 @@ import AvatarGroup from "../AvatarGroup";
 
 const SelectUser = ({ selectedUsers, setSelectedUsers }) => {
   const [allUsers, setAllUsers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [tempSelectedUsers, setTempSelectedUsers] = useState([]);
 
   const getAllUsers = async () => {
@@ -51,7 +51,7 @@ const SelectUser = ({ selectedUsers, setSelectedUsers }) => {
   }, [selectedUsers]);
 
   return (
-    <div className="space-y-4 mt-2">
+    <div className="space-y-4 mt-3 ">
       {selectedUserAvatars.length === 0 && (
         <button className="card-btn" onClick={() => setIsModalOpen(true)}>
           <LuUser className="text-sm" /> Add Members{" "}
