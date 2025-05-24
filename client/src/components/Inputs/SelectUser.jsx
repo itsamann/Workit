@@ -5,6 +5,7 @@ import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
 import { LuUser } from "react-icons/lu";
 import Modal from "../Modal";
+import AvatarGroup from "../AvatarGroup";
 
 const SelectUser = ({ selectedUsers, setSelectedUsers }) => {
   const [allUsers, setAllUsers] = useState([]);
@@ -37,7 +38,7 @@ const SelectUser = ({ selectedUsers, setSelectedUsers }) => {
 
   const selectedUserAvatars = allUsers
     .filter((user) => tempSelectedUsers.includes(user._id))
-    .map((user) => user.profileImageUrl);
+    .map((user) => user.profilePic);
 
   useEffect(() => {
     getAllUsers();
@@ -57,6 +58,15 @@ const SelectUser = ({ selectedUsers, setSelectedUsers }) => {
         </button>
       )}
 
+      {selectedUserAvatars.length > 0 && (
+        <div
+          className="cursor-pointer flex items-center gap-2"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <AvatarGroup avatars={selectedUserAvatars} maxVisible={3} />
+        </div>
+      )}
+
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -69,7 +79,7 @@ const SelectUser = ({ selectedUsers, setSelectedUsers }) => {
               className="flex items-center gap-4 p-3 border-b border-gray-200"
             >
               <img
-                src={user.profileImageUrl}
+                src={user.profilePic}
                 alt={user.name}
                 className="w-10 h-10 rounded-full"
               />
@@ -88,6 +98,15 @@ const SelectUser = ({ selectedUsers, setSelectedUsers }) => {
               />
             </div>
           ))}
+        </div>
+
+        <div className="flex justify-end gap-4 pt-4">
+          <button className="card-btn" onClick={() => setIsModalOpen(false)}>
+            CANCEL
+          </button>
+          <button className="card-btn-fill" onClick={handleAssign}>
+            ASSIGN
+          </button>
         </div>
       </Modal>
     </div>
