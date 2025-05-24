@@ -9,6 +9,7 @@ import { LuTrash2 } from "react-icons/lu";
 import SelectDropdown from "../../components/Inputs/SelectDropdown";
 import TodoListInput from "../../components/Inputs/TodoListInput";
 import SelectUsers from "../../components/Inputs/SelectUser";
+import AddAttachmentsInput from "../../components/Inputs/AddAttachmentsInput";
 
 const CreateTask = () => {
   const location = useLocation();
@@ -48,31 +49,68 @@ const CreateTask = () => {
       todoChecklist: [],
       attachments: [],
     });
+  };
 
-    // create task
-    const createTask = async () => {
-      setLoading(true);
-      try {
-        const response = await axiosInstance.post(
-          API_PATHS.TASKS.CREATE_TASK,
-          taskData
-        );
-        if (response.status === 200) {
-          toast.success("Task created successfully");
-          navigate("/admin/dashboard");
-        }
-      } catch (error) {
-        console.error("Error creating task:", error);
-        toast.error("Error creating task");
-      } finally {
-        setLoading(false);
+  // create task
+  const createTask = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.post(
+        API_PATHS.TASKS.CREATE_TASK,
+        taskData
+      );
+      if (response.status === 200) {
+        toast.success("Task created successfully");
+        navigate("/admin/dashboard");
       }
-    };
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast.error("Error creating task");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // update task
+  const updateTask = async () => {
+    // TODO: implement update logic
+    toast("Update task logic not implemented");
+  };
+
+  const handleSubmit = async () => {
+    setError(null);
+
+    // input validation
+    if (!taskData.title.trim()) {
+      setError("Title is required.");
+      return;
+    }
+    if (!taskData.description.trim()) {
+      setError("Description is required.");
+      return;
+    }
+    if (!taskData.dueDate) {
+      setError("Due date is required.");
+      return;
+    }
+    if (!taskData.assignedTo?.length === 0) {
+      setError("Task not assigned to any member");
+      return;
+    }
+    if (!taskData.todoChecklist?.length === 0) {
+      setError("Add atleast one todo task.");
+      return;
+    }
+    if (taskId) {
+      await updateTask();
+      return;
+    }
+    createTask();
   };
 
   return (
     <DashboardLayout activeMenu="Create Task">
-      <div className="mt-5">
+      <div className="mt-5 md-5">
         <div className="grid grid-cols-1 md:grid-cols-4 mt-4">
           <div className="form-card col-span-3">
             <div className="flex items-center justify-between">
@@ -160,19 +198,46 @@ const CreateTask = () => {
                   }}
                 />
               </div>
+            </div>
 
-              <div className="col-span-6 md:col-span-4">
-                <label className="text-xs font-medium text-slate-600">
-                  TODO Checklist
-                </label>
+            <div className="col-span-6 md:col-span-4 mt-3">
+              <label className="text-xs font-medium text-slate-600">
+                TODO Checklist
+              </label>
 
-                <TodoListInput
-                  todoList={taskData?.todoChecklist}
-                  setTodoList={(value) => {
-                    handleValueChange("todoChecklist", value);
-                  }}
-                />
-              </div>
+              <TodoListInput
+                todoList={taskData?.todoChecklist}
+                setTodoList={(value) => {
+                  handleValueChange("todoChecklist", value);
+                }}
+              />
+            </div>
+
+            <div className="col-span-6 md:col-span-4 mt-3">
+              <label className="text-xs font-medium text-slate-600">
+                Add Attachments
+              </label>
+
+              <AddAttachmentsInput
+                attachments={taskData?.attachments}
+                setAttachments={(value) =>
+                  handleValueChange("attachments", value)
+                }
+              />
+            </div>
+
+            {error && (
+              <p className="text-sm font-medium text-red-500 mt-5">{error}</p>
+            )}
+
+            <div className="flex justify-end mt-7">
+              <button
+                className="add-btn"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {taskId ? "UPDATE TASK" : "CREATE TASK"}
+              </button>
             </div>
           </div>
         </div>
