@@ -5,12 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
   useUserAuth();
-  return (
-    <div>
-      User Dashboard
-      {JSON.stringify(user)}
-    </div>
-  );
+  return <div>User Dashboard</div>;
 };
 
 export default UserDashboard;

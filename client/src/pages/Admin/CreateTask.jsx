@@ -55,17 +55,23 @@ const CreateTask = () => {
   const createTask = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.post(
-        API_PATHS.TASKS.CREATE_TASK,
-        taskData
-      );
-      if (response.status === 200) {
-        toast.success("Task created successfully");
-        navigate("/admin/dashboard");
-      }
+      const todolist = taskData.todoChecklist?.map((item) => ({
+        text: item,
+        completed: false,
+      }));
+
+      const response = await axiosInstance.post(API_PATHS.TASKS.CREATE_TASK, {
+        ...taskData,
+        dueDate: new Date(taskData.dueDate).toISOString(),
+        todoChecklist: todolist,
+      });
+
+      toast.success("Task Created Successfully");
+
+      clearData();
     } catch (error) {
-      console.error("Error creating task:", error);
-      toast.error("Error creating task");
+      console.log("Error creating task:", error);
+      setLoading(false);
     } finally {
       setLoading(false);
     }
