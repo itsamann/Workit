@@ -6,55 +6,48 @@ const Task = require("../models/Task");
 const getTasks = async (req, res) => {
   try {
     const { status } = req.query;
+    const isAdmin = req.user.role === "admin";
+
     let filter = {};
     if (status) {
       filter.status = status;
     }
 
-    let tasks;
-    if (req.user.role === "admin") {
-      tasks = await Task.find(filter).populate(
-        "assignedTo",
-        "name email profilePic"
-      );
-    } else {
-      tasks = await Task.find({
-        ...filter,
-        assignedTo: req.user._id,
-      }).populate("assignedTo", "name email profilePic");
+    if (!isAdmin) {
+      filter.assignedTo = req.user._id;
     }
 
-    // Add completed todoChecklist count to each task
+    // Fetch filtered tasks
+    let tasks = await Task.find(filter).populate(
+      "assignedTo",
+      "name email profilePic"
+    );
+
+    // Add completed todoChecklist count
     tasks = await Promise.all(
       tasks.map(async (task) => {
         const completedTodos = task.todoChecklist.filter(
-          (todo) => todo.completed === true
+          (todo) => todo.completed
         ).length;
         return { ...task._doc, completedTodos };
       })
     );
 
-    // Status summary counts
-    const allTasks = await Task.countDocuments(
-      req.user.role === "admin" ? {} : { assignedTo: req.user._id }
-    );
+    // Count filtered and categorized tasks
+    const statusFilter = isAdmin ? {} : { assignedTo: req.user._id };
 
+    const allTasks = await Task.countDocuments({ ...statusFilter });
     const pendingTasks = await Task.countDocuments({
-      ...filter,
+      ...statusFilter,
       status: "Pending",
-      ...(req.user.role === "admin" && { assignedTo: req.user._id }),
     });
-
     const inProgressTasks = await Task.countDocuments({
-      ...filter,
+      ...statusFilter,
       status: "In Progress",
-      ...(req.user.role === "admin" && { assignedTo: req.user._id }),
     });
-
     const completedTasks = await Task.countDocuments({
-      ...filter,
+      ...statusFilter,
       status: "Completed",
-      ...(req.user.role === "admin" && { assignedTo: req.user._id }),
     });
 
     res.status(200).json({
