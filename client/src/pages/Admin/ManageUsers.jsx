@@ -4,6 +4,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { LuFileSpreadsheet } from "react-icons/lu";
 import UserCard from "../../components/Cards/UserCard";
+import toast from "react-hot-toast";
 
 const ManageUsers = () => {
   const [allUsers, setAllUsers] = useState([]);
@@ -20,7 +21,40 @@ const ManageUsers = () => {
   };
 
   // Download Task Report
-  const handleDownloadReport = async () => {};
+  const handleDownloadReport = async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.REPORTS.EXPORT_USERS, {
+        responseType: "blob", // Important: receive response as Blob
+      });
+
+      // Create a Blob with correct MIME type for Excel files
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      // Generate a download URL for the blob
+      const downloadUrl = window.URL.createObjectURL(blob);
+
+      // Create a temporary anchor element to trigger the download
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+
+      // Suggested filename with timestamp for uniqueness and traceability
+      const timestamp = new Date().toISOString().replace(/[:.-]/g, "");
+      link.setAttribute("download", `user_tasks_report_${timestamp}.xlsx`);
+
+      // Append anchor to DOM, trigger click, then remove it
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Release the blob URL after download
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Error downloading user report:", error);
+      toast.error("Failed to download user report. Please try again later.");
+    }
+  };
 
   useEffect(() => {
     getAllUsers();

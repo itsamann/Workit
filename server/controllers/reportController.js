@@ -68,7 +68,8 @@ const exportUsersReport = async (req, res) => {
       "name email _id"
     );
 
-    const userTasksMap = users.forEach((user) => {
+    const userTasksMap = {};
+    users.forEach((user) => {
       userTasksMap[user._id] = {
         name: user.name,
         email: user.email,
@@ -80,19 +81,29 @@ const exportUsersReport = async (req, res) => {
     });
 
     userTasks.forEach((task) => {
-      if (task.assignedTo) {
+      if (Array.isArray(task.assignedTo)) {
         task.assignedTo.forEach((assignedUser) => {
-          if (userTasksMap[assignedUser._id]) {
-            userTasksMap[assignedUser._id].taskCount += 1;
-            if (task.status === "Pending") {
-              userTasksMap[assignedUser._id].pendingTasks += 1;
-            } else if (task.status === "In Progress") {
-              userTasksMap[assignedUser._id].inProgressTasks += 1;
-            } else if (task.status === "Completed") {
-              userTasksMap[assignedUser._id].completedTasks += 1;
-            }
+          const userId = assignedUser._id.toString();
+          if (userTasksMap[userId]) {
+            userTasksMap[userId].taskCount += 1;
+            if (task.status === "Pending")
+              userTasksMap[userId].pendingTasks += 1;
+            else if (task.status === "In Progress")
+              userTasksMap[userId].inProgressTasks += 1;
+            else if (task.status === "Completed")
+              userTasksMap[userId].completedTasks += 1;
           }
         });
+      } else if (task.assignedTo?._id) {
+        const userId = task.assignedTo._id.toString();
+        if (userTasksMap[userId]) {
+          userTasksMap[userId].taskCount += 1;
+          if (task.status === "Pending") userTasksMap[userId].pendingTasks += 1;
+          else if (task.status === "In Progress")
+            userTasksMap[userId].inProgressTasks += 1;
+          else if (task.status === "Completed")
+            userTasksMap[userId].completedTasks += 1;
+        }
       }
     });
 
@@ -100,7 +111,7 @@ const exportUsersReport = async (req, res) => {
     const worksheet = workbook.addWorksheet("Users Tasks Report");
 
     worksheet.columns = [
-      { header: "Name", key: "name", width: 30 },
+      { header: "User Name", key: "name", width: 30 },
       { header: "Email", key: "email", width: 40 },
       { header: "Total Assigned Tasks", key: "taskCount", width: 20 },
       { header: "Pending Tasks", key: "pendingTasks", width: 20 },
@@ -118,7 +129,7 @@ const exportUsersReport = async (req, res) => {
     );
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=users_report_${new Date().toISOString()}.xlsx`
+      `attachment; filename=users_report.xlsx`
     );
     return workbook.xlsx.write(res).then(() => {
       res.status(200).end();
