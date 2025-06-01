@@ -140,6 +140,15 @@ const updateTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
+    const isAssigned = task.assignedTo.some(
+      (userId) => userId.toString() === req.user._id.toString()
+    );
+    if (!isAssigned && req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this task" });
+    }
+
     task.title = req.body.title || task.title;
     task.description = req.body.description || task.description;
     task.priority = req.body.priority || task.priority;

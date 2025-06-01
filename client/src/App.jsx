@@ -4,7 +4,9 @@ import {
   Routes,
   Route,
   Outlet,
+  Navigate,
 } from "react-router-dom";
+
 import Signup from "./pages/Auth/Signup";
 import Login from "./pages/Auth/Login";
 import PrivateRoutes from "./routes/PrivateRoute";
@@ -56,7 +58,7 @@ const App = () => {
       </div>
 
       <Toaster
-        toaseOptions={{
+        toastOptions={{
           className: "",
           style: {
             fontSize: "13px",
@@ -71,12 +73,19 @@ export default App;
 
 const Root = () => {
   const { user, loading } = React.useContext(UserContext);
+
   if (loading) {
-    return <Outlet />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
+
   if (!user) {
     return <Navigate to="/login" />;
   }
+
   return user.role === "admin" ? (
     <Navigate to="/admin/dashboard" />
   ) : (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
@@ -6,10 +6,13 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import moment from "moment";
 import AvatarGroup from "../../components/AvatarGroup";
 import { LuSquareArrowOutUpRight } from "react-icons/lu";
+import toast from "react-hot-toast";
 
 const ViewTaskDetails = () => {
   const { id } = useParams();
   const [task, setTask] = useState(null);
+  const [loadingIndex, setLoadingIndex] = useState(null);
+  const [updatingIndex, setUpdatingIndex] = useState(null);
 
   const getStatusTagColor = (status) => {
     switch (status) {
@@ -41,7 +44,50 @@ const ViewTaskDetails = () => {
   };
 
   // handle todo check
-  const updateTodoChecklist = async (index) => {};
+  const isUpdatingRef = useRef(false);
+
+  const updateTodoChecklist = async (index) => {
+    if (!task || !task.todoChecklist) return;
+
+    // Prevent multiple rapid clicks on the same index
+    if (updatingIndex !== null) return;
+
+    setUpdatingIndex(index);
+
+    const originalChecklist = [...task.todoChecklist];
+    const updatedChecklist = originalChecklist.map((item, i) =>
+      i === index ? { ...item, completed: !item.completed } : item
+    );
+
+    // Optimistically update UI
+    setTask((prevTask) => ({
+      ...prevTask,
+      todoChecklist: updatedChecklist,
+    }));
+
+    try {
+      const response = await axiosInstance.put(
+        API_PATHS.TASKS.UPDATE_TODO_CHECKLIST(id),
+        { todoChecklist: updatedChecklist }
+      );
+
+      if (response.status === 200 && response.data?.task) {
+        setTask(response.data.task);
+        toast.success("Checklist updated!");
+      } else {
+        throw new Error("Failed response");
+      }
+    } catch (error) {
+      // Rollback UI
+      setTask((prevTask) => ({
+        ...prevTask,
+        todoChecklist: originalChecklist,
+      }));
+      toast.error("Failed to update checklist.");
+    } finally {
+      setUpdatingIndex(null);
+    }
+  };
 
   // Handle attachment link click
   const handleLinkClick = useCallback((link) => {
@@ -122,6 +168,7 @@ const ViewTaskDetails = () => {
                     text={item.text}
                     isChecked={item?.completed}
                     onChange={() => updateTodoChecklist(index)}
+                    isLoading={updatingIndex === index}
                   />
                 ))}
               </div>
@@ -163,17 +210,20 @@ const InfoBox = ({ label, value }) => {
   );
 };
 
-const TodoCheckList = ({ text, isChecked, onChange }) => {
+const TodoCheckList = ({ text, isChecked, onChange, isLoading }) => {
   return (
     <div className="flex items-center gap-3 p-3">
       <input
         type="checkbox"
         checked={isChecked}
+        disabled={isLoading}
         onChange={onChange}
         className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm outline-none cursor-pointer"
       />
-
       <p className="text-[13px] text-gray-800">{text}</p>
+      {isLoading && (
+        <span className="loader w-4 h-4 border-2 border-t-transparent border-gray-400 rounded-full animate-spin" />
+      )}
     </div>
   );
 };
