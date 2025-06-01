@@ -45,7 +45,6 @@ const ManageTasks = () => {
     navigate(`/admin/create-task`, { state: { taskId: taskData._id } });
   };
 
-  // download task report
   // Download task report
   const handleDownloadReport = async () => {
     try {
