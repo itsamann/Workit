@@ -24,6 +24,13 @@ const Dashboard = () => {
   const [pieChartData, setPieChartData] = useState(null);
   const [barChartData, setBarChartData] = useState(null);
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   // Prepare Chart Data
   const prepareChartData = (data) => {
     const taskDistribution = data?.taskDistribution || null;
@@ -74,8 +81,10 @@ const Dashboard = () => {
       <div className="card my-5">
         <div>
           <div className="col-span-3">
-            <h2 className="text-xl md:text-2xl">Good Morning! {user?.name}</h2>
-            <p className="text-xs md:text-[13px] text=gray-400 mt-1.5">
+            <h2 className="text-xl md:text-2xl">
+              {getGreeting()}! {user?.name}
+            </h2>
+            <p className="text-xs md:text-[13px] text-gray-400 mt-1.5">
               {moment().format("dddd, MMMM Do YYYY")}
             </p>
           </div>
