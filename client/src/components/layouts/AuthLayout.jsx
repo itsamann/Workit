@@ -1,18 +1,26 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { CheckSquare } from "lucide-react";
 
 function AuthLayout({ children }) {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login"; // Check if it's the login page
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen overflow-hidden font-[Poppins] bg-white">
       {/* Left Panel (Form Side) */}
       <div className="w-full md:w-[55%] px-8 sm:px-14 py-12 flex flex-col justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-blue-600 mb-10 tracking-tight">
-            Workit
-          </h1>
+          <div
+            onClick={() => navigate("/")}
+            className="flex items-center space-x-2 mb-10 cursor-pointer"
+          >
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
+              <CheckSquare className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold text-slate-900">Workit</span>
+          </div>
           {children}
         </div>
         <p className=" text-sm text-gray-400 text-center mt-40 mb-4">

@@ -23,6 +23,7 @@ import MyTasks from "./pages/User/MyTasks";
 import ViewTaskDetails from "./pages/User/ViewTaskDetails";
 import { UserContext, UserProvider } from "./context/userContext";
 import { Toaster } from "react-hot-toast";
+import LandingPage from "./pages/LandingPage/LandingPage";
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={<LandingPage />} />
 
             {/* Admin Routes */}
             <Route element={<PrivateRoutes allowedRoles={["admin"]} />}>
@@ -50,9 +52,6 @@ const App = () => {
                 element={<ViewTaskDetails />}
               />
             </Route>
-
-            {/* Default Route */}
-            <Route path="/" element={<Root />} />
           </Routes>
         </Router>
       </div>

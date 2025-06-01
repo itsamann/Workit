@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
+import toast from "react-hot-toast";
 
 export const UserContext = createContext();
 
@@ -51,7 +52,8 @@ export const UserProvider = ({ children }) => {
 
   const logout = () => {
     clearUser();
-    window.location.href = "/login";
+    toast.success("Logged out successfully");
+    window.location.href = "/";
   };
 
   return (
