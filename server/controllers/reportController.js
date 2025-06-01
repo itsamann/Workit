@@ -7,7 +7,7 @@ const excelJS = require("exceljs");
 // @access  Private/Admin
 const exportTasksReport = async (req, res) => {
   try {
-    const tasks = await Task.find({}).populate("assignedTo", "name email");
+    const tasks = await Task.find().populate("assignedTo", "name email");
 
     const workbook = new excelJS.Workbook();
     const worksheet = workbook.addWorksheet("Tasks Report");
@@ -19,21 +19,33 @@ const exportTasksReport = async (req, res) => {
       { header: "Priority", key: "priority", width: 15 },
       { header: "Status", key: "status", width: 20 },
       { header: "Due Date", key: "dueDate", width: 20 },
-      { header: "Assigned To", key: "assignedTo.name", width: 30 },
+      { header: "Assigned To", key: "assignedTo", width: 40 },
     ];
 
     tasks.forEach((task) => {
-      const assignedTo = task.assignedTo
-        .map((user) => `${user.name} (${user.email})`)
-        .join(", ");
+      const assignedTo =
+        Array.isArray(task.assignedTo) && task.assignedTo.length > 0
+          ? task.assignedTo
+              .map((user) => `${user.name} (${user.email})`)
+              .join(", ")
+          : task.assignedTo?.name
+          ? `${task.assignedTo.name} (${task.assignedTo.email})`
+          : "Unassigned";
+
       worksheet.addRow({
-        _id: task._id,
+        _id: task._id.toString(),
         title: task.title,
         description: task.description,
         priority: task.priority,
         status: task.status,
-        dueDate: task.dueDate.toLocaleDateString().split("T")[0],
-        assignedTo: assignedTo || "Unassigned",
+        dueDate: task.dueDate
+          ? task.dueDate.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          : "N/A",
+        assignedTo,
       });
     });
 
@@ -44,16 +56,19 @@ const exportTasksReport = async (req, res) => {
 
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=tasks_report_${new Date().toISOString()}.xlsx`
+      `attachment; filename=tasks_report_${
+        new Date().toISOString().split("T")[0]
+      }.xlsx`
     );
 
-    return workbook.xlsx.write(res).then(() => {
-      res.status(200).end();
-    });
+    await workbook.xlsx.write(res);
+    res.status(200).end();
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error Exporting Task", error: error.message });
+    console.error("Error exporting tasks report:", error);
+    res.status(500).json({
+      message: "Error Exporting Task Report",
+      error: error.message,
+    });
   }
 };
 
