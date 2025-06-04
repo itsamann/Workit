@@ -14,7 +14,7 @@ import {
   Paperclip,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import Workit from "../../assets/Workit.png"; // adjust path as needed
+import Workit from "../../assets/Workit.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -38,14 +38,14 @@ const LandingPage = () => {
               onClick={() =>
                 window.open("https://github.com/itsamann/", "_blank")
               }
-              className="hidden md:inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors"
+              className="hidden md:inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors cursor-pointer"
             >
               <Github className="mr-2 h-4 w-4" />
               GitHub
             </button>
             <button
               onClick={() => navigate("/signup")}
-              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition-all duration-200"
+              className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition-all duration-200 cursor-pointer"
             >
               Try Demo
             </button>

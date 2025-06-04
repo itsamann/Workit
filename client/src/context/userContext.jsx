@@ -53,7 +53,7 @@ export const UserProvider = ({ children }) => {
   const logout = () => {
     clearUser();
     toast.success("Logged out successfully");
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   return (
